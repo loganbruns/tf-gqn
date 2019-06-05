@@ -113,6 +113,11 @@ def gqn_draw_model_fn(features, labels, mode, params):
         max_outputs=1
     )
     tf.summary.image(
+        'target_sample',
+        target_sample,
+        max_outputs=1
+    )
+    tf.summary.image(
         'target_means',
         mu_target,
         max_outputs=1

@@ -37,6 +37,9 @@ ARGPARSER.add_argument(
 ARGPARSER.add_argument(
     '--seq_length', type=int, default=8,
     help='The number of generation steps of the DRAW LSTM.')
+ARGPARSER.add_argument(
+    '--enc_type', type=str, default='pool',
+    help='The encoding architecture type.')
 # solver parameters
 ARGPARSER.add_argument(
     '--adam_lr_alpha', type=float, default=5*10e-5,
@@ -48,6 +51,9 @@ ARGPARSER.add_argument(
 ARGPARSER.add_argument(
     '--train_epochs', type=int, default=2,
     help='The number of epochs to train.')
+ARGPARSER.add_argument(
+    '--train_subset', type=float, default=1.0,
+    help='The percentage of the dataset to use.')
 # snapshot parameters
 ARGPARSER.add_argument(
     '--chkpt_steps', type=int, default=10000,
@@ -98,6 +104,7 @@ def main(unparsed_argv):
       save_checkpoints_steps=FLAGS.chkpt_steps,
   )
   custom_params = {
+      'ENC_TYPE' : FLAGS.enc_type,
       'SEQ_LENGTH' : FLAGS.seq_length,
       'ADAM_LR_ALPHA' : FLAGS.adam_lr_alpha,
       'ADAM_LR_BETA' : FLAGS.adam_lr_beta,
@@ -133,6 +140,7 @@ def main(unparsed_argv):
         batch_size=FLAGS.batch_size,
         num_threads=FLAGS.queue_threads,
         buffer_size=FLAGS.queue_buffer,
+        subset=FLAGS.train_subset
     )
     eval_results = classifier.evaluate(
         input_fn=eval_input,
@@ -151,6 +159,7 @@ def main(unparsed_argv):
         batch_size=FLAGS.batch_size,
         num_threads=FLAGS.queue_threads,
         buffer_size=FLAGS.queue_buffer,
+        subset=FLAGS.train_subset
     )
     classifier.train(
         input_fn=train_input,
@@ -166,6 +175,7 @@ def main(unparsed_argv):
         batch_size=FLAGS.batch_size,
         num_threads=FLAGS.queue_threads,
         buffer_size=FLAGS.queue_buffer,
+        subset=FLAGS.train_subset
     )
     eval_results = classifier.evaluate(
         input_fn=eval_input,

@@ -290,7 +290,7 @@ class GQNTFRecordDataset(tf.data.Dataset):
 
   def __init__(self, dataset, context_size, root, mode='train',
                custom_frame_size=None, num_threads=4, buffer_size=256,
-               parse_batch_size=32):
+               parse_batch_size=32, subset=None):
     """Instantiates a DataReader object and sets up queues for data reading.
 
     Args:
@@ -309,6 +309,7 @@ class GQNTFRecordDataset(tf.data.Dataset):
           records are read, defualts to 256.
       parse_batch_size: (optional) integer, number of records to parse at the
           same time, defaults to 32.
+      subset: (optional) float, percentage of dataset to use.
 
     Raises:
       ValueError: if the required version does not exist; if the required mode
@@ -346,6 +347,8 @@ class GQNTFRecordDataset(tf.data.Dataset):
     }
 
     file_names = _get_dataset_files(self._dataset_info, mode, root)
+    if subset:
+      file_names = file_names[:int(subset * len(file_names))]
 
     self._dataset = tf.data.TFRecordDataset(file_names,
                                             num_parallel_reads=num_threads)
@@ -440,7 +443,10 @@ def gqn_input_fn(
     # Queue params
     num_threads=4,
     buffer_size=256,
-    seed=None):
+    seed=None,
+    # Optionally sample a subset
+    subset=None
+):
   """
   Creates a tf.data.Dataset based op that returns data.
     Args:
@@ -476,7 +482,7 @@ def gqn_input_fn(
 
   dataset = GQNTFRecordDataset(
       dataset, context_size, root, str_mode, custom_frame_size, num_threads,
-      buffer_size)
+      buffer_size, subset=subset)
 
   if mode == tf.estimator.ModeKeys.TRAIN:
     dataset = dataset.shuffle(buffer_size=(buffer_size * batch_size), seed=seed)

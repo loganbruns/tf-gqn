@@ -18,7 +18,7 @@ from __future__ import print_function
 import tensorflow as tf
 
 from .gqn_params import GQNConfig
-from .gqn_encoder import tower_encoder, pool_encoder
+from .gqn_encoder import tower_encoder, pool_encoder, sa_encoder
 from .gqn_draw import inference_rnn, generator_rnn
 from .gqn_utils import broadcast_encoding, compute_eta_and_sample_z
 from .gqn_vae import vae_tower_decoder
@@ -27,6 +27,7 @@ from .gqn_vae import vae_tower_decoder
 _ENC_FUNCTIONS = {
     'pool' : pool_encoder,
     'tower' : tower_encoder,
+    'sa' : sa_encoder,
 }
 
 def _pack_context(context_poses, context_frames, model_params):
@@ -119,7 +120,7 @@ def gqn_draw(
     endpoints.update(endpoints_enc)
 
     # broadcast scene representation to 1/4 of targeted frame size
-    if _ENC_TYPE == 'pool':
+    if _ENC_TYPE == 'pool' or _ENC_TYPE == 'sa':
       enc_r_broadcast = broadcast_encoding(
           vector=enc_r, height=_DIM_H_ENC, width=_DIM_W_ENC)
     else:
